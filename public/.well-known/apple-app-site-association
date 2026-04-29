@@ -1,0 +1,13 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["7L9YT2TMVS.com.b1zzy.paperlessios"],
+        "components": [
+          { "/": "/share/*" },
+          { "/": "/split/*" }
+        ]
+      }
+    ]
+  }
+}
