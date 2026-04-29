@@ -53,6 +53,22 @@ function mapPayloadToReceiptData(rawPayload) {
       }))
     : [];
 
+  const computedSubtotal = items.reduce((sum, item) => {
+    const itemTotal = Number.isFinite(item.total)
+      ? item.total
+      : Number(item.unit_price || 0) * Number(item.quantity || 1);
+    return sum + itemTotal;
+  }, 0);
+
+  const mappedTotal = Number(sourceReceipt.total);
+  const total = Number.isFinite(mappedTotal) ? mappedTotal : 0;
+
+  const mappedSubtotal = Number(sourceReceipt.subtotal);
+  const subtotal = Number.isFinite(mappedSubtotal) ? mappedSubtotal : computedSubtotal;
+
+  const mappedTax = Number(sourceReceipt.tax);
+  const tax = Number.isFinite(mappedTax) ? mappedTax : Math.max(0, total - subtotal);
+
   return {
     version: safeNumber(rawPayload.version, 0),
     split_percent: splitPercent,
@@ -62,9 +78,9 @@ function mapPayloadToReceiptData(rawPayload) {
       payment_method: sourceReceipt.paymentMethod || '',
       store_address: sourceReceipt.storeAddress || '',
       receipt_id: sourceReceipt.receiptID || '',
-      subtotal: safeNumber(sourceReceipt.subtotal),
-      tax: safeNumber(sourceReceipt.tax),
-      total: safeNumber(sourceReceipt.total),
+      subtotal,
+      tax,
+      total,
       items,
     },
   };
