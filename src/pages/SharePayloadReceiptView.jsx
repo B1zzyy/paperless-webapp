@@ -44,9 +44,12 @@ function mapPayloadToReceiptData(rawPayload) {
   const items = Array.isArray(sourceReceipt.items)
     ? sourceReceipt.items.map((item) => ({
         name: item?.name || '',
-        quantity: safeNumber(item?.quantity, 1),
+        quantity: (() => {
+          const q = Number(item?.quantity);
+          return Number.isFinite(q) && q > 0 ? q : 1;
+        })(),
         unit_price: safeNumber(item?.unitPrice),
-        total: safeNumber(item?.total),
+        total: Number(item?.total),
       }))
     : [];
 
@@ -161,7 +164,10 @@ export default function SharePayloadReceiptView() {
               </div>
               <div className="space-y-3">
                 {receipt.items?.map((item, i) => {
-                  const splitItemTotal = ((item.total || 0) * pct) / 100;
+                  const itemTotal = Number.isFinite(item.total)
+                    ? item.total
+                    : Number(item.unit_price || 0) * Number(item.quantity || 1);
+                  const splitItemTotal = (itemTotal * pct) / 100;
                   return (
                     <div key={i} className="flex items-center justify-between">
                       <div className="flex-1 min-w-0">
@@ -175,11 +181,11 @@ export default function SharePayloadReceiptView() {
                       <div className="text-right">
                         {isSplitView ? (
                           <>
-                            <p className="text-xs text-muted-foreground line-through">${item.total?.toFixed(2)}</p>
+                            <p className="text-xs text-muted-foreground line-through">${itemTotal.toFixed(2)}</p>
                             <p className="text-sm font-semibold text-primary">${splitItemTotal.toFixed(2)}</p>
                           </>
                         ) : (
-                          <p className="text-sm font-semibold">${item.total?.toFixed(2)}</p>
+                          <p className="text-sm font-semibold">${itemTotal.toFixed(2)}</p>
                         )}
                       </div>
                     </div>
