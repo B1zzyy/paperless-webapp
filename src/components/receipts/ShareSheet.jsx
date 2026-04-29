@@ -9,6 +9,13 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 
 const PRESETS = [25, 33, 50, 75];
+const PUBLIC_SHARE_BASE_URL = 'https://paperless-webapp.vercel.app';
+
+function encodePayloadToBase64Url(payload) {
+  const json = JSON.stringify(payload);
+  const base64 = btoa(unescape(encodeURIComponent(json)));
+  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+}
 
 export default function ShareSheet({ receipt, onClose }) {
   const [splitPercent, setSplitPercent] = useState(null);
@@ -24,14 +31,36 @@ export default function ShareSheet({ receipt, onClose }) {
 
   const handleGenerate = async () => {
     setIsGenerating(true);
-    const shared = await db.entities.SharedReceipt.create({
-      receipt_id: receipt.id,
-      split_percent: effectiveSplit,
-      receipt_snapshot: receipt,
-    });
-    const link = `${window.location.origin}/split/${shared.id}`;
-    setGeneratedLink(link);
-    setIsGenerating(false);
+    try {
+      const payload = {
+        version: 1,
+        splitPercent: effectiveSplit,
+        receipt: {
+          storeName: receipt.store_name || '',
+          purchaseDate: receipt.purchase_date || null,
+          paymentMethod: receipt.payment_method || '',
+          storeAddress: receipt.store_address || '',
+          receiptID: receipt.receipt_id || '',
+          subtotal: receipt.subtotal || 0,
+          tax: receipt.tax || 0,
+          total: receipt.total || 0,
+          items: Array.isArray(receipt.items)
+            ? receipt.items.map((item) => ({
+                name: item?.name || '',
+                quantity: item?.quantity || 1,
+                unitPrice: item?.unit_price || 0,
+                total: item?.total || 0,
+              }))
+            : [],
+        },
+      };
+
+      const encodedPayload = encodePayloadToBase64Url(payload);
+      const link = `${PUBLIC_SHARE_BASE_URL}/share?payload=${encodedPayload}`;
+      setGeneratedLink(link);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleCopy = async () => {
