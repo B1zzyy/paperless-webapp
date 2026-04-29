@@ -11,7 +11,7 @@ const AuthContext = createContext();
 function isSupabasePublicPath() {
   if (typeof window === 'undefined') return false;
   const p = window.location.pathname;
-  return p === '/login' || p.startsWith('/split/');
+  return p === '/login' || p === '/share' || p.startsWith('/split/');
 }
 
 export const AuthProvider = ({ children }) => {
