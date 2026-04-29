@@ -117,17 +117,12 @@ export default function SharePayloadReceiptView() {
     <div className="min-h-screen bg-background">
       <div className="max-w-lg mx-auto px-5 pt-10 pb-10">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-          <div className="flex items-center gap-2 mb-1">
-            <Scissors className="w-3.5 h-3.5 text-primary" />
-            <p className="text-xs font-medium text-primary uppercase tracking-widest">
-              {isSplitView ? `Split Receipt · Your ${pct}%` : 'Shared Receipt'}
-            </p>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            {isSplitView
-              ? 'Someone shared this receipt with you. Below is your portion.'
-              : 'Someone shared this full receipt with you.'}
-          </p>
+          {isSplitView ? (
+            <div className="flex items-center gap-2 mb-1">
+              <Scissors className="w-3.5 h-3.5 text-primary" />
+              <p className="text-xs font-medium text-primary uppercase tracking-widest">{`Split Receipt · Your ${pct}%`}</p>
+            </div>
+          ) : null}
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
@@ -219,10 +214,10 @@ export default function SharePayloadReceiptView() {
                   {isSplitView ? (
                     <>
                       <span className="line-through mr-2">${receipt.subtotal?.toFixed(2)}</span>
-                      <span className="text-foreground">${((receipt.subtotal * pct) / 100).toFixed(2)}</span>
+                      <span className="text-muted-foreground">${((receipt.subtotal * pct) / 100).toFixed(2)}</span>
                     </>
                   ) : (
-                    <span className="text-foreground">${receipt.subtotal?.toFixed(2)}</span>
+                    <span className="text-muted-foreground">${receipt.subtotal?.toFixed(2)}</span>
                   )}
                 </div>
               </div>
@@ -232,17 +227,17 @@ export default function SharePayloadReceiptView() {
                   {isSplitView ? (
                     <>
                       <span className="line-through mr-2">${receipt.tax?.toFixed(2)}</span>
-                      <span className="text-foreground">${((receipt.tax * pct) / 100).toFixed(2)}</span>
+                      <span className="text-muted-foreground">${((receipt.tax * pct) / 100).toFixed(2)}</span>
                     </>
                   ) : (
-                    <span className="text-foreground">${receipt.tax?.toFixed(2)}</span>
+                    <span className="text-muted-foreground">${receipt.tax?.toFixed(2)}</span>
                   )}
                 </div>
               </div>
               <Separator className="my-2" />
               <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-base font-bold">{isSplitView ? 'Your Total' : 'Total'}</p>
+                  <p className="text-2xl font-bold">{isSplitView ? 'Your Total' : 'Total'}</p>
                   {isSplitView && <p className="text-xs text-muted-foreground">{pct}% of ${receipt.total?.toFixed(2)}</p>}
                 </div>
                 <span className={`text-2xl font-bold ${isSplitView ? 'text-primary' : ''}`}>
@@ -252,7 +247,6 @@ export default function SharePayloadReceiptView() {
             </div>
           </div>
 
-          <p className="text-center text-xs text-muted-foreground mt-6">Shared via Receipt Scanner</p>
         </motion.div>
       </div>
     </div>
